@@ -17,7 +17,12 @@ class VersionExpressionReflector(sa.sql.visitors.ReplacingCloningVisitor):
         except KeyError:
             reflected_column = column
         else:
-            reflected_column = table.c[column.name]
+            for c in table.c.values():
+                if c.name == column.name:
+                    reflected_column = c
+                    break
+            else:
+                raise RuntimeError("Could not find column when reflecting a versioned expression")
             if (
                 column in self.relationship.local_columns and
                 table == self.parent.__table__
