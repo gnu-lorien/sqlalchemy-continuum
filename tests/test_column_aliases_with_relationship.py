@@ -6,16 +6,10 @@ from sqlalchemy.orm import relationship
 from tests import TestCase, create_test_cases
 
 
-class VersionTableDifferentNameBaseTestCase(TestCase):
-    @property
-    def options(self):
-        base_options = super().options
-        base_options["table_name"] = "%s_something_completely_different"
-        return base_options
-
+class ColumnAliasesWithRelationshipBaseTestCase(TestCase):
     def create_models(self):
         class TextItem(self.Model):
-            __tablename__ = 'text_item_different_version'
+            __tablename__ = 'text_item_with_relationship'
             __versioned__ = {}
 
             id = sa.Column(
@@ -28,7 +22,7 @@ class VersionTableDifferentNameBaseTestCase(TestCase):
         self.TextItem = TextItem
 
         class RelationshipWithTextItem(self.Model):
-            __tablename__ = 'relationship_with_text_item_different_version'
+            __tablename__ = 'relationship_with_text_item_with_relationship'
             __versioned__ = {}
 
             id = sa.Column('id', sa.Integer, autoincrement=True, primary_key=True)
@@ -39,8 +33,14 @@ class VersionTableDifferentNameBaseTestCase(TestCase):
         self.RelationshipWithTextItem = RelationshipWithTextItem
 
 
-class VersionTableDifferentNameTestCase(VersionTableDifferentNameBaseTestCase):
-    def test_verison_table_different_name_insert_relationship(self):
+@mark.skipif('True')
+class TestVersionTableWithColumnAliasesWithRelationship(ColumnAliasesWithRelationshipBaseTestCase):
+    def test_column_reflection(self):
+        assert '_id' in version_class(self.TextItem).__table__.c
+
+
+class ColumnAliasesWithRelationshipTestCase(ColumnAliasesWithRelationshipBaseTestCase):
+    def test_insert_relationship(self):
         item = self.TextItem(name=u'Something')
         self.session.add(item)
         self.session.commit()
@@ -48,3 +48,6 @@ class VersionTableDifferentNameTestCase(VersionTableDifferentNameBaseTestCase):
         self.session.add(related)
         self.session.commit()
         assert related.versions[0].text_item.id == item.id
+
+
+create_test_cases(ColumnAliasesWithRelationshipTestCase)
