@@ -4,7 +4,7 @@ from .exc import ClassNotVersioned
 from .expression_reflector import VersionExpressionReflector
 from .operation import Operation
 from .table_builder import TableBuilder
-from .utils import adapt_columns, version_class, option, get_versioning_manager
+from .utils import adapt_columns, version_class, option
 
 
 class RelationshipBuilder(object):
@@ -295,7 +295,7 @@ class RelationshipBuilder(object):
                     association_exists,
                     self.association_version_table.c.operation_type !=
                     Operation.DELETE,
-                    adapt_columns(self.property.secondaryjoin, get_versioning_manager(obj)),
+                    adapt_columns(self.property.secondaryjoin),
                 )
             ).correlate(self.local_cls, self.remote_cls)
         )

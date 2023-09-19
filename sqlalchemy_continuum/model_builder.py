@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import column_property
 from sqlalchemy_utils.functions import get_declarative_base
 
-from .utils import adapt_columns, option, get_versioning_manager
+from .utils import adapt_columns, option
 from .version import VersionClassBase
 
 
@@ -192,8 +192,7 @@ class ModelBuilder(object):
                     mapper = sa.inspect(self.model)
 
                     inherit_condition = adapt_columns(
-                        mapper.inherit_condition,
-                        get_versioning_manager(parent)
+                        mapper.inherit_condition
                     )
                     tx_column_name = self.manager.options[
                         'transaction_column_name'

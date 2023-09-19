@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import bindparam
 
-from .utils import version_table, get_versioning_manager
+from .utils import version_table
 
 
 class VersionExpressionReflector(sa.sql.visitors.ReplacingCloningVisitor):
@@ -13,7 +13,7 @@ class VersionExpressionReflector(sa.sql.visitors.ReplacingCloningVisitor):
         if not isinstance(column, sa.Column):
             return
         try:
-            table = version_table(column.table, get_versioning_manager(self.parent))
+            table = version_table(column.table)
         except KeyError:
             reflected_column = column
         else:
