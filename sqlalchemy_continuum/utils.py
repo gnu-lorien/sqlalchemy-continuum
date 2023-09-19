@@ -127,23 +127,24 @@ def version_class(model):
         return model
 
 
-def version_table(table):
+def version_table(table, manager):
     """
     Return associated version table for given SQLAlchemy Table object.
 
     :param table: SQLAlchemy Table object
     """
+    table_name = manager.options["table_name"] % table.name
     if table.schema:
         return table.metadata.tables[
-            table.schema + '.' + table.name + '_version'
+            table.schema + '.' + table_name
         ]
     elif table.metadata.schema:
         return table.metadata.tables[
-            table.metadata.schema + '.' + table.name + '_version'
+            table.metadata.schema + '.' + table_name
         ]
     else:
         return table.metadata.tables[
-            table.name + '_version'
+            table_name
         ]
 
 
@@ -442,11 +443,14 @@ def changeset(obj):
 
 
 class VersioningClauseAdapter(sa.sql.visitors.ReplacingCloningVisitor):
+    def __init__(self, manager):
+        self.manager = manager
+
     def replace(self, col):
         if isinstance(col, sa.Column):
-            table = version_table(col.table)
+            table = version_table(col.table, self.manager)
             return table.c.get(col.key)
 
 
-def adapt_columns(expr):
-    return VersioningClauseAdapter().traverse(expr)
+def adapt_columns(expr, manager):
+    return VersioningClauseAdapter(manager).traverse(expr)
