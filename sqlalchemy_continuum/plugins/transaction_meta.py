@@ -67,6 +67,12 @@ class TransactionMetaBase(object):
 class TransactionMetaFactory(ModelFactory):
     model_name = 'TransactionMeta'
 
+    def __init__(self, options={}):
+        self.options = {
+            "table_name": "transaction_meta"
+        }
+        self.options.update(options)
+
     def create_class(self, manager):
         """
         Create TransactionMeta class.
@@ -75,7 +81,7 @@ class TransactionMetaFactory(ModelFactory):
             manager.declarative_base,
             TransactionMetaBase
         ):
-            __tablename__ = 'transaction_meta'
+            __tablename__ = self.options["table_name"]
 
         TransactionMeta.transaction = sa.orm.relationship(
             manager.transaction_cls,
@@ -100,10 +106,16 @@ class TransactionMetaFactory(ModelFactory):
 
 
 class TransactionMetaPlugin(Plugin):
+    def __init__(self, options={}):
+        self.options = {
+            "table_name": "transaction_meta"
+        }
+        self.options.update(options)
+
     def after_build_tx_class(self, manager):
-        self.model_class = TransactionMetaFactory()(manager)
+        self.model_class = TransactionMetaFactory(self.options)(manager)
         manager.transaction_meta_cls = self.model_class
 
     def after_build_models(self, manager):
-        self.model_class = TransactionMetaFactory()(manager)
+        self.model_class = TransactionMetaFactory(self.options)(manager)
         manager.transaction_meta_cls = self.model_class
